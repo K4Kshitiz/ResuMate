@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{% block title %}AI Resume Assistant{% endblock %}</title>
+  <link rel="icon" href="{{ url_for('static', filename='resumate-icon.png') }}" type="image/png">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script>
+    // Check if dark mode is preferred
+    function updateIcon() {
+      const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const icon = document.querySelector('.resumate-logo');
+      if (icon) {
+        icon.style.filter = isDark ? 'invert(1)' : 'none';
+      }
+    }
+    
+    // Listen for changes in color scheme
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateIcon);
+    
+    // Initial check
+    document.addEventListener('DOMContentLoaded', updateIcon);
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body { 
+      background-color: #f0f2f5;
+      background-image: url("{{ url_for('static', filename='resumate-icon.png') }}");
+      background-repeat: repeat;
+      background-position: center;
+      background-size: 180px;
+      background-attachment: fixed;
+      font-family: 'Poppins', sans-serif;
+      min-height: 100vh;
+      position: relative;
+      opacity: 1;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: inherit;
+      opacity: 0.1;
+      z-index: -2;
+      transform: rotate(45deg);
+    }
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: #f0f2f5;
+      opacity: 0.98;
+      z-index: -1;
+    }
+    .navbar { 
+      background: linear-gradient(135deg, #6a1b9a, #4a148c);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      padding: 1rem 0;
+    }
+    .navbar-brand img {
+      border-radius: 6px;
+      background: white;
+      padding: 2px;
+    }
+
+    .navbar .navbar-brand { 
+      color: white;
+      font-weight: 600;
+      font-size: 1.4rem;
+    }
+
+    .navbar .nav-link { 
+      color: rgba(255,255,255,0.9);
+      transition: all 0.3s ease;
+      margin: 0 10px;
+    }
+    .navbar .nav-link:hover { 
+      color: #FFD700;
+      transform: translateY(-1px);
+    }
+
+    .resumate-logo {
+      padding: 4px;
+      border-radius: 8px;
+      background: white;
+    }
+
+    .card {
+      border: none;
+      border-radius: 15px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease;
+    }
+    .card:hover {
+      transform: translateY(-5px);
+    }
+    .btn {
+      border-radius: 12px;
+      padding: 12px 24px;
+      transition: all 0.3s ease;
+      font-weight: 500;
+    }
+    .btn:hover {
+      transform: translateY(-2px);
+      transition: all 0.3s ease;
+    }
+    .card {
+      transition: all 0.3s ease;
+    }
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1) !important;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #4B0082, #800080);
+      border: none;
+      box-shadow: 0 4px 15px rgba(75, 0, 130, 0.2);
+    }
+    .btn-warning {
+      background: linear-gradient(135deg, #FFD700, #FFA500);
+      border: none;
+      color: white;
+      box-shadow: 0 4px 15px rgba(255, 193, 7, 0.2);
+      display: inline-block;
+      text-align: center;
+      text-decoration: none;
+      padding: 12px 24px;
+    }
+    .btn-outline-secondary:hover {
+      background: #f8f9fa;
+      color: #4B0082;
+      border-color: #4B0082;
+    }
+    .form-control {
+      border-radius: 8px;
+      padding: 10px 15px;
+      border: 1px solid #ddd;
+    }
+    .form-control:focus {
+      box-shadow: 0 0 0 3px rgba(75,0,130,0.2);
+      border-color: #4B0082;
+    }
+    pre {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 8px;
+      border: 1px solid #e9ecef;
+    }
+
+    /* Dark mode styles with smooth transitions */
+    body {
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .dark-mode {
+      background-color: #1a1a1a !important;
+      color: #e4e4e4 !important;
+    }
+
+    .dark-mode::before {
+      opacity: 0.05 !important;
+    }
+
+    .dark-mode::after {
+      background: #1a1a1a !important;
+      opacity: 0.95 !important;
+    }
+
+    .dark-mode .card {
+      background-color: #242424 !important;
+      color: #e4e4e4 !important;
+      border-color: #333 !important;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2) !important;
+    }
+
+    .dark-mode .form-control {
+      background-color: #333 !important;
+      color: #e4e4e4 !important;
+      border-color: #444 !important;
+      transition: all 0.3s ease;
+    }
+
+    .dark-mode .form-control:focus {
+      background-color: #3a3a3a !important;
+      box-shadow: 0 0 0 3px rgba(147, 51, 234, 0.3) !important;
+      border-color: #9333ea !important;
+    }
+
+    .dark-mode pre {
+      background-color: #242424 !important;
+      color: #e4e4e4 !important;
+      border-color: #333 !important;
+    }
+
+    .dark-mode .alert {
+      background-color: #242424 !important;
+      color: #e4e4e4 !important;
+      border-color: #444 !important;
+    }
+
+    .dark-mode .navbar {
+      background: linear-gradient(135deg, #4a148c, #311b92) !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2) !important;
+    }
+
+    .dark-mode .navbar .nav-link {
+      color: #e4e4e4 !important;
+      opacity: 0.9;
+      transition: opacity 0.3s ease;
+    }
+
+    .dark-mode .navbar .nav-link:hover {
+      opacity: 1;
+      color: #fff !important;
+    }
+
+    .dark-mode .navbar-brand span {
+      background: linear-gradient(to right, #fff, #e4e4e4) !important;
+      -webkit-background-clip: text !important;
+    }
+
+    .dark-mode .resumate-logo {
+      background: white !important;
+    }
+
+    .dark-mode .btn-warning {
+      background: linear-gradient(135deg, #00BCD4, #00ACC1) !important;
+      color: #fff !important;
+      border: none !important;
+      box-shadow: 0 4px 12px rgba(0, 188, 212, 0.2) !important;
+    }
+
+    .dark-mode .btn-warning:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(99, 102, 241, 0.3) !important;
+    }
+
+    .dark-mode .btn-primary {
+      background: linear-gradient(135deg, #312e81, #4c1d95) !important;
+      border: none !important;
+      color: #fff !important;
+    }
+
+    .dark-mode .btn-outline-light {
+      border-color: #e4e4e4 !important;
+      color: #e4e4e4 !important;
+    }
+
+    .dark-mode .btn-outline-light:hover {
+      background-color: #e4e4e4 !important;
+      color: #1a1a1a !important;
+    }
+
+    .dark-mode h1, 
+    .dark-mode h2, 
+    .dark-mode h3, 
+    .dark-mode h4, 
+    .dark-mode h5 {
+      color: #e4e4e4 !important;
+    }
+
+    .dark-mode a {
+      color: #9333ea !important;
+      transition: color 0.3s ease;
+    }
+
+    .dark-mode a:hover {
+      color: #6366f1 !important;
+    }
+  /* Responsive Design Media Queries */
+    @media (max-width: 1024px) {
+      .container {
+        padding: 0 20px;
+      }
+      .how-it-works .card {
+        margin-bottom: 20px;
+      }
+      .testimonials .card {
+        margin-bottom: 20px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .navbar-brand span {
+        font-size: 1.4rem;
+      }
+      .resumate-logo {
+        height: 36px;
+      }
+      .display-4 {
+        font-size: 2rem;
+      }
+      .lead {
+        font-size: 1.1rem;
+      }
+      .how-it-works .card {
+        margin-bottom: 15px;
+      }
+      .btn-lg {
+        padding: 10px 20px;
+        font-size: 1rem;
+      }
+      .footer .d-flex {
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+      }
+      .hero-section {
+        padding: 40px 0;
+      }
+      .form-control {
+        margin-bottom: 10px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .navbar-brand span {
+        font-size: 1.2rem;
+      }
+      .resumate-logo {
+        height: 32px;
+      }
+      .display-4 {
+        font-size: 1.8rem;
+      }
+      .hero-section {
+        padding: 30px 0;
+      }
+      .btn-lg {
+        width: 100%;
+        margin-bottom: 10px;
+      }
+      .nav-link {
+        padding: 8px 12px;
+      }
+      .work-experience {
+        padding: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg">
+    <div class="container d-flex justify-content-between">
+      <a class="navbar-brand d-flex align-items-center gap-2" href="/">
+        <img src="{{ url_for('static', filename='resumate-icon.png') }}" height="42" alt="Resumate Logo" class="resumate-logo">
+        <span style="font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 1.8rem; letter-spacing: -0.5px; background: linear-gradient(to right, #fff, #f0f0f0); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">ResuMate</span>
+      </a>
+
+
+      <div>
+        {% if session.get('user') %}
+          <span class="text-white me-3">Hi, {{ session['user'] }}</span>
+          <a href="/logout" class="btn btn-sm btn-warning">Logout</a>
+        {% else %}
+          <div class="d-flex align-items-center gap-2">
+            <a class="nav-link" href="/login" style="padding: 6px 15px;">Login</a>
+            <a class="nav-link" href="/signup" style="padding: 6px 15px;">Signup</a>
+            <button id="darkModeToggle" class="nav-link d-flex align-items-center justify-content-center" style="width: 35px; height: 35px; padding: 0; background: transparent; border: none;">
+              <span id="darkModeIcon" style="color: white; font-size: 1.2rem;">🌙</span>
+            </button>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </nav>
+
+  <div class="container mt-5">
+    {% block content %}{% endblock %}
+  </div>
+
+  <script>
+    const toggle = document.getElementById("darkModeToggle");
+    const prefersDark = localStorage.getItem("darkMode") === "true";
+
+    const darkModeIcon = document.getElementById("darkModeIcon");
+    
+    if (prefersDark) {
+      document.body.classList.add("dark-mode");
+      darkModeIcon.textContent = "☀️";
+    }
+
+    toggle.addEventListener("click", () => {
+      document.body.classList.toggle("dark-mode");
+      const isDark = document.body.classList.contains("dark-mode");
+      darkModeIcon.textContent = isDark ? "☀️" : "🌙";
+      localStorage.setItem("darkMode", isDark);
+    });
+  </script>
+</body>
+</html>

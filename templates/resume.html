@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block title %}Resume Builder{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm p-4" style="max-width: 700px; margin: auto;">
+  <h3 class="text-center mb-4">Generate Your Resume Instantly</h3>
+
+  <form method="POST">
+    <!-- Job Details -->
+    <div class="mb-3">
+      <label class="form-label">Job Title</label>
+      <input type="text" class="form-control" name="role" required>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Industry</label>
+      <input type="text" class="form-control" name="industry">
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Education</label>
+      <input type="text" class="form-control" name="education">
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Skills</label>
+      <textarea class="form-control" name="skills" rows="4" placeholder="- Communication\n- Teamwork\n- Time Management" required></textarea>
+    </div>
+
+    <!-- Work Experience -->
+    <div id="work-experiences">
+      <h6 class="text-muted">Work Experience</h6>
+      <div class="work-experience border rounded p-3 mb-3">
+        <input type="text" class="form-control mb-2" name="companies[]" placeholder="Company Name" required>
+        <input type="text" class="form-control mb-2" name="job_titles[]" placeholder="Job Title" required>
+        <div class="d-flex gap-2 mb-2">
+          <input type="month" class="form-control" name="start_dates[]" required>
+          <input type="month" class="form-control" name="end_dates[]" required>
+        </div>
+        <textarea class="form-control" name="achievements[]" placeholder="Key achievements or responsibilities" required></textarea>
+      </div>
+    </div>
+
+    <button type="button" class="btn btn-secondary mb-3" onclick="addWorkExperience()">➕ Add More Experience</button>
+    <button type="submit" class="btn btn-warning w-100" id="generateBtn" data-loading-text="Generating...">✨ Generate Resume</button>
+  </form>
+
+  {% if error %}
+    <div class="alert alert-danger mt-3">
+      <strong>Error:</strong> {{ error }}
+      {% if error == "OpenAI API Error" %}
+      <small class="d-block mt-1">Please try again in a few moments.</small>
+      {% endif %}
+    </div>
+  {% endif %}
+
+  {% if response %}
+    <div class="mt-4">
+      <h5>📝 Suggested Resume</h5>
+      <pre>{{ response }}</pre>
+      <form method="POST" action="/download">
+        <input type="hidden" name="pdfcontent" value="{{ response }}">
+        <button type="submit" class="btn btn-success w-100 mt-2">📄 Download as PDF</button>
+      </form>
+    </div>
+  {% endif %}
+</div>
+
+<script>
+function addWorkExperience() {
+  const container = document.getElementById('work-experiences');
+  const newSection = document.createElement('div');
+  newSection.className = 'work-experience border rounded p-3 mb-3';
+  newSection.innerHTML = `
+    <input type="text" class="form-control mb-2" name="companies[]" placeholder="Company Name" required>
+    <input type="text" class="form-control mb-2" name="job_titles[]" placeholder="Job Title" required>
+    <div class="d-flex gap-2 mb-2">
+      <input type="month" class="form-control" name="start_dates[]" required>
+      <input type="month" class="form-control" name="end_dates[]" required>
+    </div>
+    <textarea class="form-control" name="achievements[]" placeholder="Key achievements or responsibilities" required></textarea>
+  `;
+  container.appendChild(newSection);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  const form = document.querySelector('form');
+  const generateBtn = document.getElementById('generateBtn');
+
+  if (form && generateBtn) {
+    form.addEventListener('submit', function() {
+      generateBtn.disabled = true;
+      generateBtn.innerHTML = '🔄 Generating...';
+
+      setTimeout(() => {
+        generateBtn.disabled = false;
+        generateBtn.innerHTML = '✨ Generate Resume';
+      }, 60000);
+    });
+  }
+});
+</script>
+{% endblock %}
